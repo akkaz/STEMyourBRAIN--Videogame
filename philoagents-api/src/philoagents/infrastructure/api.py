@@ -40,6 +40,33 @@ app.add_middleware(
 )
 
 
+@app.get("/debug/prompt-config")
+async def debug_prompt_config():
+    """Debug endpoint to check prompt configuration"""
+    from philoagents.config import settings
+    from philoagents.domain.prompts import (
+        PHILOSOPHER_CHARACTER_CARD,
+        SUMMARY_PROMPT,
+        EXTEND_SUMMARY_PROMPT,
+        CONTEXT_SUMMARY_PROMPT,
+    )
+    
+    return {
+        "prompt_version_env": settings.PROMPT_VERSION,
+        "prompts": {
+            "philosopher_character_card": {
+                "name": PHILOSOPHER_CHARACTER_CARD.name,
+                "content_preview": str(PHILOSOPHER_CHARACTER_CARD)[:200] + "...",
+                "content_length": len(str(PHILOSOPHER_CHARACTER_CARD)),
+            },
+            "summary_prompt": {
+                "name": SUMMARY_PROMPT.name,
+                "content_preview": str(SUMMARY_PROMPT)[:200] + "...",
+            },
+        }
+    }
+
+
 class ChatMessage(BaseModel):
     message: str
     philosopher_id: str
@@ -136,6 +163,53 @@ async def reset_conversation():
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/reset-all-memory")
+async def reset_all_memory():
+    """Resets ALL memory: both conversation state (short-term) and RAG documents (long-term).
+    
+    This endpoint deletes:
+    - Conversation checkpoints and writes (short-term memory)
+    - RAG documents (long-term memory)
+    
+    Use this when you want to completely reset the system.
+
+    Raises:
+        HTTPException: If there is an error resetting memory.
+    Returns:
+        dict: A dictionary containing the result of the reset operation.
+    """
+    from pymongo import MongoClient
+    from philoagents.config import settings
+    
+    try:
+        # Reset conversation state (short-term memory)
+        conversation_result = await reset_conversation_state()
+        
+        # Reset long-term memory (RAG documents)
+        client = MongoClient(settings.MONGO_URI)
+        db = client[settings.MONGO_DB_NAME]
+        
+        collections_deleted = []
+        
+        # Delete long-term memory collection
+        if settings.MONGO_LONG_TERM_MEMORY_COLLECTION in db.list_collection_names():
+            db.drop_collection(settings.MONGO_LONG_TERM_MEMORY_COLLECTION)
+            collections_deleted.append(settings.MONGO_LONG_TERM_MEMORY_COLLECTION)
+        
+        client.close()
+        
+        return {
+            "status": "success",
+            "message": "All memory reset successfully",
+            "details": {
+                "conversation_state": conversation_result,
+                "long_term_memory_deleted": collections_deleted
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to reset all memory: {str(e)}")
 
 
 if __name__ == "__main__":

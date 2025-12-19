@@ -59,16 +59,16 @@ export class Game extends Scene
 
     createPhilosophers(map, layers) {
         const philosopherConfigs = [
-            { id: "socrates", name: "Socrates", defaultDirection: "right", roamRadius: 800 },
-            { id: "aristotle", name: "Aristotle", defaultDirection: "right", roamRadius: 700 },
-            { id: "plato", name: "Plato", defaultDirection: "front", roamRadius: 750 },
-            { id: "descartes", name: "Descartes", defaultDirection: "front", roamRadius: 650 },
-            { id: "leibniz", name: "Leibniz", defaultDirection: "front", roamRadius: 720 },
-            { id: "ada_lovelace", name: "Ada Lovelace", defaultDirection: "front", roamRadius: 680 },
-            { id: "turing", name: "Turing", defaultDirection: "front", roamRadius: 770 },
-            { id: "searle", name: "Searle", defaultDirection: "front", roamRadius: 730 },
-            { id: "chomsky", name: "Chomsky", defaultDirection: "front", roamRadius: 690 },
-            { id: "dennett", name: "Dennett", defaultDirection: "front", roamRadius: 710 },
+            { id: "socrates", name: "Gio Marco Baglioni", spawnName: "Socrates", defaultDirection: "right", roamRadius: 800 },
+            { id: "aristotle", name: "Aristotele", spawnName: "Aristotle", defaultDirection: "right", roamRadius: 700 },
+            { id: "plato", name: "Platone", spawnName: "Plato", defaultDirection: "front", roamRadius: 750 },
+            { id: "descartes", name: "Cartesio", spawnName: "Descartes", defaultDirection: "front", roamRadius: 650 },
+            { id: "leibniz", name: "Leibniz", spawnName: "Leibniz", defaultDirection: "front", roamRadius: 720 },
+            { id: "ada_lovelace", name: "Ada Lovelace", spawnName: "Ada Lovelace", defaultDirection: "front", roamRadius: 680 },
+            { id: "turing", name: "Alan Turing", spawnName: "Turing", defaultDirection: "front", roamRadius: 770 },
+            { id: "searle", name: "John Searle", spawnName: "Searle", defaultDirection: "front", roamRadius: 730 },
+            { id: "chomsky", name: "Noam Chomsky", spawnName: "Chomsky", defaultDirection: "front", roamRadius: 690 },
+            { id: "dennett", name: "Daniel Dennett", spawnName: "Dennett", defaultDirection: "front", roamRadius: 710 },
             { 
                 id: "miguel", 
                 name: "Miguel", 
@@ -88,7 +88,7 @@ export class Game extends Scene
         this.philosophers = [];
         
         philosopherConfigs.forEach(config => {
-            const spawnPoint = map.findObject("Objects", (obj) => obj.name === config.name);
+            const spawnPoint = map.findObject("Objects", (obj) => obj.name === (config.spawnName || config.name));
             
             this[config.id] = new Character(this, {
                 id: config.id,

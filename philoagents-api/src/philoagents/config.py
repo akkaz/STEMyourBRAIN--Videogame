@@ -35,6 +35,10 @@ class Settings(BaseSettings):
         default="philoagents_course",
         description="Project name for Comet ML and Opik tracking.",
     )
+    PROMPT_VERSION: str = Field(
+        default="v1",
+        description="Version for prompt library in Opik. Change this to update prompts without rebuilding.",
+    )
 
     # --- Agents Configuration ---
     TOTAL_MESSAGES_SUMMARY_TRIGGER: int = 30
