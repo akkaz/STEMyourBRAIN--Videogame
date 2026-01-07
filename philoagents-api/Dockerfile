@@ -14,4 +14,9 @@ RUN uv sync --no-cache
 COPY src/philoagents philoagents/
 COPY tools tools/
 
-CMD ["/app/.venv/bin/fastapi", "run", "philoagents/infrastructure/api.py", "--port", "8000", "--host", "0.0.0.0"]
+# Railway provides PORT env var, default to 8000 for local
+ENV PORT=8000
+EXPOSE ${PORT}
+
+# Use shell form to allow variable substitution
+CMD /app/.venv/bin/fastapi run philoagents/infrastructure/api.py --port ${PORT} --host 0.0.0.0
