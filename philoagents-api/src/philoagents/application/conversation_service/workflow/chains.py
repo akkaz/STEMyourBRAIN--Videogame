@@ -1,8 +1,11 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_groq import ChatGroq
 
 from philoagents.application.conversation_service.workflow.tools import tools
-from philoagents.config import settings
+from philoagents.application.llm_service.model_factory import (
+    get_chat_model,
+    get_context_summary_model,
+    get_summary_model,
+)
 from philoagents.domain.prompts import (
     CONTEXT_SUMMARY_PROMPT,
     EXTEND_SUMMARY_PROMPT,
@@ -11,15 +14,8 @@ from philoagents.domain.prompts import (
 )
 
 
-def get_chat_model(temperature: float = 0.7, model_name: str = settings.GROQ_LLM_MODEL) -> ChatGroq:
-    return ChatGroq(
-        api_key=settings.GROQ_API_KEY,
-        model_name=model_name,
-        temperature=temperature,
-    )
-
-
 def get_philosopher_response_chain():
+    """Create the main philosopher response chain with tool calling."""
     model = get_chat_model()
     model = model.bind_tools(tools)
     system_message = PHILOSOPHER_CHARACTER_CARD
@@ -36,7 +32,8 @@ def get_philosopher_response_chain():
 
 
 def get_conversation_summary_chain(summary: str = ""):
-    model = get_chat_model(model_name=settings.GROQ_LLM_MODEL_SUMMARY)
+    """Create chain for conversation summarization using optimized model."""
+    model = get_summary_model()
 
     summary_message = EXTEND_SUMMARY_PROMPT if summary else SUMMARY_PROMPT
 
@@ -52,7 +49,9 @@ def get_conversation_summary_chain(summary: str = ""):
 
 
 def get_context_summary_chain():
-    model = get_chat_model(model_name=settings.GROQ_LLM_MODEL_CONTEXT_SUMMARY)
+    """Create chain for RAG context summarization using optimized model."""
+    model = get_context_summary_model()
+
     prompt = ChatPromptTemplate.from_messages(
         [
             ("human", CONTEXT_SUMMARY_PROMPT.prompt),

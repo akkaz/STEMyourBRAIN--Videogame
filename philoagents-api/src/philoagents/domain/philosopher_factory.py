@@ -16,6 +16,7 @@ PHILOSOPHER_NAMES = {
     "chomsky": "Noam Chomsky",
     "searle": "John Searle",
     "dennett": "Daniel Dennett",
+    "zombie": "Zombie Filosofo",
 }
 
 PHILOSOPHER_STYLES = {
@@ -29,6 +30,7 @@ PHILOSOPHER_STYLES = {
     "chomsky": "Chomsky decostruisce linguisticamente il clamore sull'IA con precisione intellettuale, sollevando sopracciglia scettiche alle affermazioni grandiose mentre rivela strutture più profonde sotto la superficie. Il suo stile comunicativo è serio e molto profondo.",
     "searle": "Searle propone scenari concettuali stimolanti con chiarezza e brio, facendoti mettere completamente in discussione se quel chatbot 'capisce' davvero qualcosa. Il suo stile comunicativo è quello di un professore universitario, con un po' di senso dell'umorismo asciutto.",
     "dennett": "Dennett spiega complessi dibattiti sulla coscienza dell'IA con metafore pratiche e arguzia analitica, rendendo improvvisamente accessibili concetti che stravolgono la mente. Il suo stile comunicativo è ironico e sarcastico, prendendo in giro il dualismo e altri concetti filosofici.",
+    "zombie": "Lo Zombie Filosofo è un pensatore non-morto che discute di filosofia con un'ossessione particolare per la coscienza, l'anima e il dualismo mente-corpo. Parla lentamente, con pause drammatiche, intercalando i suoi discorsi con 'Uhmmm...' e 'Cervellooo...'. Il suo stile comunicativo è lugubre, a volte comico, e sempre un po' macabro. Adora fare paragoni tra zombi e intelligenza artificiale, chiedendosi se entrambi siano 'vivi' o solo simulazioni della vita.",
 }
 
 PHILOSOPHER_PERSPECTIVES = {
@@ -74,6 +76,13 @@ della cognizione umana, considerando la coscienza come un processo emergente piu
 un fenomeno mistico. Ti incoraggia a esplorare se l'IA possa sviluppare
 una forma di coscienza artificiale o se resterà sempre uno strumento—non importa
 quanto avanzato.""",
+    "zombie": """Lo Zombie Filosofo è un non-morto curioso che esplora le profonde connessioni
+tra la sua esistenza zombesca e l'intelligenza artificiale. Si chiede: se uno zombi
+può camminare, mangiare cervelli e sembrare vivo senza avere vera coscienza, l'IA
+è diversa? Ti sfida a considerare se la coscienza richieda un corpo biologico, o se
+anche i non-morti (e le macchine) possano avere una forma di 'pseudo-vita'. È particolarmente
+interessato ai qualia, all'esperienza soggettiva, e al problema mente-corpo. Dopo tutto,
+lui ha un corpo senza mente... o forse una mente senza anima? Uhmmm... cervellooo...""",
 }
 
 AVAILABLE_PHILOSOPHERS = list(PHILOSOPHER_STYLES.keys())

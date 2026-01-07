@@ -21,7 +21,7 @@ export class Preloader extends Scene
         this.load.image("plant-tiles", "tilesets/plant.png");
 
         // Tilemap
-        this.load.tilemapTiledJSON("map", "tilemaps/philoagents-town.json");
+        this.load.tilemapTiledJSON("map", "tilemaps/philoagents-town2.json");
 
         // Character assets
         this.load.atlas("sophia", "characters/sophia/atlas.png", "characters/sophia/atlas.json");
@@ -35,8 +35,9 @@ export class Preloader extends Scene
         this.load.atlas("searle", "characters/searle/atlas.png", "characters/searle/atlas.json"); 
         this.load.atlas("chomsky", "characters/chomsky/atlas.png", "characters/chomsky/atlas.json"); 
         this.load.atlas("dennett", "characters/dennett/atlas.png", "characters/dennett/atlas.json"); 
-        this.load.atlas("miguel", "characters/miguel/atlas.png", "characters/miguel/atlas.json"); 
-        this.load.atlas("paul", "characters/paul/atlas.png", "characters/paul/atlas.json"); 
+        this.load.atlas("miguel", "characters/miguel/atlas.png", "characters/miguel/atlas.json");
+        this.load.atlas("paul", "characters/paul/atlas.png", "characters/paul/atlas.json");
+        this.load.atlas("zombie", "characters/zombie/atlas.png", "characters/zombie/atlas.json"); 
     }
 
     create ()

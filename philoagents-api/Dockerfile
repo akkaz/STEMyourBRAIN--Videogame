@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Install the application dependencies.
 COPY uv.lock pyproject.toml README.md ./
-RUN uv sync --frozen --no-cache
+RUN uv sync --no-cache
 
 # Copy the application into the container.
 COPY src/philoagents philoagents/

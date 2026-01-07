@@ -1,4 +1,4 @@
-from langchain.tools.retriever import create_retriever_tool
+from langchain_core.tools import create_retriever_tool
 
 from philoagents.application.rag.retrievers import get_retriever
 from philoagents.config import settings

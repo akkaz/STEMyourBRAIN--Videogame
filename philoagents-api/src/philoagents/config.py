@@ -9,13 +9,39 @@ class Settings(BaseSettings):
         env_file=".env", extra="ignore", env_file_encoding="utf-8"
     )
 
+    # --- LLM Provider Selection ---
+    LLM_PROVIDER: str = Field(
+        default="groq",
+        description="LLM provider to use: 'groq', 'gemini', 'openai', 'anthropic'"
+    )
+
+    # --- Model Configuration ---
+    LLM_MODEL: str = Field(
+        default="llama-3.3-70b-versatile",
+        description="Main model for conversations"
+    )
+    LLM_MODEL_SUMMARY: str = Field(
+        default="llama-3.1-8b-instant",
+        description="Model for conversation summarization"
+    )
+    LLM_MODEL_CONTEXT_SUMMARY: str = Field(
+        default="llama-3.1-8b-instant",
+        description="Model for RAG context summarization"
+    )
+
     # --- GROQ Configuration ---
-    GROQ_API_KEY: str
+    GROQ_API_KEY: str | None = None
     GROQ_LLM_MODEL: str = "llama-3.3-70b-versatile"
     GROQ_LLM_MODEL_CONTEXT_SUMMARY: str = "llama-3.1-8b-instant"
-    
-    # --- OpenAI Configuration (Required for evaluation) ---
-    OPENAI_API_KEY: str
+
+    # --- Gemini Configuration ---
+    GEMINI_API_KEY: str | None = None
+
+    # --- OpenAI Configuration ---
+    OPENAI_API_KEY: str | None = None
+
+    # --- Anthropic Configuration ---
+    ANTHROPIC_API_KEY: str | None = None
 
     # --- MongoDB Configuration ---
     MONGO_URI: str = Field(

@@ -76,12 +76,20 @@ export class Game extends Scene
                 roamRadius: 300,
                 defaultMessage: "Hey there! I'm Miguel, but you can call me Mr Agent. I'd love to chat, but I'm currently writing my Substack article for tomorrow. If you're curious about my work, take a look at The Neural Maze!" 
             },
-            { 
-                id: "paul", 
-                name: "Paul", 
+            {
+                id: "paul",
+                name: "Paul",
                 defaultDirection: "front",
                 roamRadius: 300,
-                defaultMessage: "Hey, I'm busy teaching my cat AI with my latest course. I can't talk right now. Check out Decoding ML for more on my thoughts." 
+                defaultMessage: "Hey, I'm busy teaching my cat AI with my latest course. I can't talk right now. Check out Decoding ML for more on my thoughts."
+            },
+            {
+                id: "zombie",
+                name: "Zombie",
+                defaultDirection: "front",
+                roamRadius: 400,
+                moveSpeed: 30,
+                defaultMessage: "Braaaains... I mean... philosophy..."
             }
         ];
 
