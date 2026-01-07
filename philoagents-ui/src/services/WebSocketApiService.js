@@ -16,14 +16,24 @@ class WebSocketApiService {
   }
 
   determineWebSocketBaseUrl() {
+    // Check for build-time API_URL (Railway deployment)
+    if (process.env.API_URL) {
+      // Convert https:// to wss:// or http:// to ws://
+      const apiUrl = process.env.API_URL;
+      const wsUrl = apiUrl.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
+      console.log('Using configured WebSocket URL:', wsUrl);
+      return wsUrl;
+    }
+
+    // Fallback to auto-detection for local dev
     const isHttps = window.location.protocol === 'https:';
-    
+
     if (isHttps) {
       console.log('Using GitHub Codespaces');
       const currentHostname = window.location.hostname;
-      return `ws://${currentHostname.replace('8080', '8000')}`;
+      return `wss://${currentHostname.replace('8080', '8000')}`;
     }
-    
+
     return 'ws://localhost:8000';
   }
 

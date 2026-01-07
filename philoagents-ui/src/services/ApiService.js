@@ -1,13 +1,20 @@
 class ApiService {
   constructor() {
-    const isHttps = window.location.protocol === 'https:';
-    
-    if (isHttps) {
-      console.log('Using GitHub Codespaces');
-      const currentHostname = window.location.hostname;
-      this.apiUrl = `https://${currentHostname.replace('8080', '8000')}`;
+    // Check for build-time API_URL (Railway deployment)
+    if (process.env.API_URL) {
+      this.apiUrl = process.env.API_URL;
+      console.log('Using configured API URL:', this.apiUrl);
     } else {
-      this.apiUrl = 'http://localhost:8000';
+      // Fallback to auto-detection for local dev
+      const isHttps = window.location.protocol === 'https:';
+
+      if (isHttps) {
+        console.log('Using GitHub Codespaces');
+        const currentHostname = window.location.hostname;
+        this.apiUrl = `https://${currentHostname.replace('8080', '8000')}`;
+      } else {
+        this.apiUrl = 'http://localhost:8000';
+      }
     }
   }
 

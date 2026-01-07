@@ -61,7 +61,8 @@ module.exports = {
             "typeof PLUGIN_3D": JSON.stringify(false),
             "typeof PLUGIN_CAMERA3D": JSON.stringify(false),
             "typeof PLUGIN_FBINSTANT": JSON.stringify(false),
-            "typeof FEATURE_SOUND": JSON.stringify(true)
+            "typeof FEATURE_SOUND": JSON.stringify(true),
+            "process.env.API_URL": JSON.stringify(process.env.API_URL || ''),
         }),
         new HtmlWebpackPlugin({
             template: "./index.html"
@@ -69,7 +70,7 @@ module.exports = {
         new CopyPlugin({
             patterns: [
                 { from: 'public/assets', to: 'assets' },
-                { from: 'public/favicon.png', to: 'favicon.png' },
+                { from: 'public/assets/favicon.png', to: 'favicon.png' },
                 { from: 'public/style.css', to: 'style.css' }
             ],
         }),
