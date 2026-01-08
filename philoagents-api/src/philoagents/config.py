@@ -71,8 +71,8 @@ class Settings(BaseSettings):
     TOTAL_MESSAGES_AFTER_SUMMARY: int = 5
 
     # --- RAG Configuration ---
-    RAG_TEXT_EMBEDDING_MODEL_ID: str = "sentence-transformers/all-MiniLM-L6-v2"
-    RAG_TEXT_EMBEDDING_MODEL_DIM: int = 384
+    RAG_TEXT_EMBEDDING_MODEL_ID: str = "text-embedding-3-small"
+    RAG_TEXT_EMBEDDING_MODEL_DIM: int = 1536
     RAG_TOP_K: int = 3
     RAG_DEVICE: str = "cpu"
     RAG_CHUNK_SIZE: int = 256
