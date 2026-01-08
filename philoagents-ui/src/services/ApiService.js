@@ -1,8 +1,8 @@
 class ApiService {
   constructor() {
     // Check for build-time API_URL (Railway deployment)
-    if (process.env.API_URL) {
-      this.apiUrl = process.env.API_URL;
+    if (typeof API_URL !== 'undefined' && API_URL) {
+      this.apiUrl = API_URL;
       console.log('Using configured API URL:', this.apiUrl);
     } else {
       // Fallback to auto-detection for local dev

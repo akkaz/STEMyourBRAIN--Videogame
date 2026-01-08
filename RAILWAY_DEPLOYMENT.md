@@ -52,10 +52,10 @@ The deployment consists of 3 services:
    LLM_MODEL_SUMMARY=llama-3.1-8b-instant
    LLM_MODEL_CONTEXT_SUMMARY=llama-3.1-8b-instant
 
-   # API Key for your provider (REQUIRED - choose one)
-   GROQ_API_KEY=your_groq_api_key
+   # API Keys (REQUIRED)
+   OPENAI_API_KEY=your_openai_api_key  # Required for embeddings
+   GROQ_API_KEY=your_groq_api_key      # For LLM provider (or use GEMINI/ANTHROPIC)
    # GEMINI_API_KEY=your_gemini_api_key
-   # OPENAI_API_KEY=your_openai_api_key
    # ANTHROPIC_API_KEY=your_anthropic_api_key
 
    # Optional
@@ -105,9 +105,9 @@ If you prefer to deploy everything together:
 | `LLM_MODEL` | Yes | Main model name |
 | `LLM_MODEL_SUMMARY` | Yes | Summary model name |
 | `LLM_MODEL_CONTEXT_SUMMARY` | Yes | Context summary model name |
+| `OPENAI_API_KEY` | Yes | OpenAI API key (required for embeddings) |
 | `GROQ_API_KEY` | If using Groq | Groq API key |
 | `GEMINI_API_KEY` | If using Gemini | Google AI API key |
-| `OPENAI_API_KEY` | If using OpenAI | OpenAI API key |
 | `ANTHROPIC_API_KEY` | If using Anthropic | Anthropic API key |
 | `COMET_API_KEY` | No | For Opik/Comet ML tracking |
 | `PROMPT_VERSION` | No | Prompt version (default: v1) |
