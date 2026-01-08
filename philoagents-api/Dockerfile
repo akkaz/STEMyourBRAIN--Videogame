@@ -18,5 +18,7 @@ COPY tools tools/
 ENV PORT=8000
 EXPOSE ${PORT}
 
+# Force rebuild: 2026-01-08
+
 # Use shell form to allow variable substitution
 CMD /app/.venv/bin/fastapi run philoagents/infrastructure/api.py --port ${PORT} --host 0.0.0.0
