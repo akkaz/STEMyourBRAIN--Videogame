@@ -7,7 +7,6 @@ export class MainMenu extends Scene {
 
     create() {
         this.add.image(0, 0, 'background').setOrigin(0, 0);
-        this.add.image(510, 260, 'logo').setScale(0.55);
 
         const centerX = this.cameras.main.width / 2;
         const startY = 524;
