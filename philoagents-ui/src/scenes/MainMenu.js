@@ -13,15 +13,15 @@ export class MainMenu extends Scene {
         const startY = 524;
         const buttonSpacing = 70;
 
-        this.createButton(centerX, startY, 'Let\'s Play!', () => {
+        this.createButton(centerX, startY, 'Gioca!', () => {
             this.scene.start('Game');
         });
 
-        this.createButton(centerX, startY + buttonSpacing, 'Instructions', () => {
+        this.createButton(centerX, startY + buttonSpacing, 'Istruzioni', () => {
             this.showInstructions();
         });
 
-        this.createButton(centerX, startY + buttonSpacing * 2, 'Support Philoagents', () => {
+        this.createButton(centerX, startY + buttonSpacing * 2, 'Crediti', () => {
             window.open('https://github.com/neural-maze/philoagents-course', '_blank');
         });
     }
@@ -134,7 +134,7 @@ export class MainMenu extends Scene {
     }
     
     addInstructionContent(centerX, centerY, panel) {
-        const title = this.add.text(centerX, centerY - 110, 'INSTRUCTIONS', {
+        const title = this.add.text(centerX, centerY - 110, 'ISTRUZIONI', {
             fontSize: '28px',
             fontFamily: 'Arial',
             color: '#000000',
@@ -142,9 +142,9 @@ export class MainMenu extends Scene {
         }).setOrigin(0.5);
         
         const instructions = [
-            'Arrow keys for moving',
-            'SPACE for talking to philosophers',
-            'ESC for closing the dialogue'
+            'Frecce per muoverti',
+            'SPAZIO per parlare con i personaggi',
+            'ESC per chiudere il dialogo'
         ];
         
         const textElements = [];
@@ -176,7 +176,7 @@ export class MainMenu extends Scene {
         closeButton.lineStyle(2, 0x000000, 1);
         closeButton.strokeRoundedRect(x - buttonWidth / 2, adjustedY - buttonHeight / 2, buttonWidth, buttonHeight, cornerRadius);
         
-        const closeText = this.add.text(x, adjustedY, 'Close', {
+        const closeText = this.add.text(x, adjustedY, 'Chiudi', {
             fontSize: '20px',
             fontFamily: 'Arial',
             color: '#000000',

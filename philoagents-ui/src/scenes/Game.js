@@ -59,37 +59,71 @@ export class Game extends Scene
 
     createPhilosophers(map, layers) {
         const philosopherConfigs = [
-            { id: "socrates", name: "Gio Marco Baglioni", spawnName: "Socrates", defaultDirection: "right", roamRadius: 800 },
-            { id: "aristotle", name: "Aristotele", spawnName: "Aristotle", defaultDirection: "right", roamRadius: 700 },
-            { id: "plato", name: "Platone", spawnName: "Plato", defaultDirection: "front", roamRadius: 750 },
-            { id: "descartes", name: "Cartesio", spawnName: "Descartes", defaultDirection: "front", roamRadius: 650 },
-            { id: "leibniz", name: "Leibniz", spawnName: "Leibniz", defaultDirection: "front", roamRadius: 720 },
-            { id: "ada_lovelace", name: "Ada Lovelace", spawnName: "Ada Lovelace", defaultDirection: "front", roamRadius: 680 },
-            { id: "turing", name: "Alan Turing", spawnName: "Turing", defaultDirection: "front", roamRadius: 770 },
-            { id: "searle", name: "John Searle", spawnName: "Searle", defaultDirection: "front", roamRadius: 730 },
-            { id: "chomsky", name: "Noam Chomsky", spawnName: "Chomsky", defaultDirection: "front", roamRadius: 690 },
-            { id: "dennett", name: "Daniel Dennett", spawnName: "Dennett", defaultDirection: "front", roamRadius: 710 },
-            { 
-                id: "miguel", 
-                name: "Miguel", 
-                defaultDirection: "front", 
-                roamRadius: 300,
-                defaultMessage: "Hey there! I'm Miguel, but you can call me Mr Agent. I'd love to chat, but I'm currently writing my Substack article for tomorrow. If you're curious about my work, take a look at The Neural Maze!" 
-            },
+            // === BABILONIA: IL SEGRETO DI BOBBY ===
+
+            // Nicolò (Bobby) - La Guida al Portale (con Tutorial) - Sta fermo vicino allo spawn
             {
-                id: "paul",
-                name: "Paul",
+                id: "nicolo",
+                name: "Nicolò",
+                spawnName: "Nicolo",
                 defaultDirection: "front",
-                roamRadius: 300,
-                defaultMessage: "Hey, I'm busy teaching my cat AI with my latest course. I can't talk right now. Check out Decoding ML for more on my thoughts."
+                roamRadius: 30,
+                moveSpeed: 10
             },
+
+            // Akane - La Mercante Tsundere (Mercato delle Ombre) - Lettera B
             {
-                id: "zombie",
-                name: "Zombie",
+                id: "akane",
+                name: "Akane",
+                spawnName: "Akane",
                 defaultDirection: "front",
-                roamRadius: 400,
-                moveSpeed: 30,
-                defaultMessage: "Braaaains... I mean... philosophy..."
+                roamRadius: 150
+            },
+
+            // Hiroshi - Il Giardiniere Superbo (Giardini Pensili) - Lettera O
+            {
+                id: "hiroshi",
+                name: "Hiroshi",
+                spawnName: "Hiroshi",
+                defaultDirection: "front",
+                roamRadius: 200
+            },
+
+            // Ryo - Il Monaco Eremita (Tempio Diroccato) - Lettera B
+            {
+                id: "ryo",
+                name: "Ryo",
+                spawnName: "Ryo",
+                defaultDirection: "front",
+                roamRadius: 80,
+                moveSpeed: 20
+            },
+
+            // Mei - La Bibliotecaria Dolce (Biblioteca Infestata) - Lettera B
+            {
+                id: "mei",
+                name: "Mei",
+                spawnName: "Mei",
+                defaultDirection: "front",
+                roamRadius: 120
+            },
+
+            // Kaito - Il Vecchio Marinaio (Porto Dimenticato) - Lettera Y
+            {
+                id: "kaito",
+                name: "Kaito",
+                spawnName: "Kaito",
+                defaultDirection: "front",
+                roamRadius: 180
+            },
+
+            // === EASTER EGG ===
+            {
+                id: "socrates",
+                name: "Gio Marco Baglioni",
+                spawnName: "GioMarco",
+                defaultDirection: "right",
+                roamRadius: 300
             }
         ];
 

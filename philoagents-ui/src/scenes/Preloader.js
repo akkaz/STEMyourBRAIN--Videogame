@@ -12,7 +12,7 @@ export class Preloader extends Scene
         this.load.setPath('assets');
 
         // General assets
-        this.load.image('background', 'talking_philosophers.jpg');
+        this.load.image('background', 'babilonia_cover.jpg');
         this.load.image('logo', 'logo.png');
 
         // Tilesets
@@ -23,21 +23,19 @@ export class Preloader extends Scene
         // Tilemap
         this.load.tilemapTiledJSON("map", "tilemaps/philoagents-town2.json");
 
-        // Character assets
+        // Character assets - Player
         this.load.atlas("sophia", "characters/sophia/atlas.png", "characters/sophia/atlas.json");
+
+        // BABILONIA Characters
+        this.load.atlas("nicolo", "characters/nicolo/atlas.png", "characters/nicolo/atlas.json");     // Guide (Bobby)
+        this.load.atlas("akane", "characters/akane/atlas.png", "characters/akane/atlas.json");       // Merchant
+        this.load.atlas("hiroshi", "characters/hiroshi/atlas.png", "characters/hiroshi/atlas.json"); // Gardener
+        this.load.atlas("ryo", "characters/ryo/atlas.png", "characters/ryo/atlas.json");             // Monk
+        this.load.atlas("mei", "characters/mei/atlas.png", "characters/mei/atlas.json");             // Librarian
+        this.load.atlas("kaito", "characters/kaito/atlas.png", "characters/kaito/atlas.json");       // Sailor
+
+        // Easter Egg
         this.load.atlas("socrates", "characters/socrates/atlas.png", "characters/socrates/atlas.json"); 
-        this.load.atlas("plato", "characters/plato/atlas.png", "characters/plato/atlas.json"); 
-        this.load.atlas("aristotle", "characters/aristotle/atlas.png", "characters/aristotle/atlas.json"); 
-        this.load.atlas("descartes", "characters/descartes/atlas.png", "characters/descartes/atlas.json"); 
-        this.load.atlas("leibniz", "characters/leibniz/atlas.png", "characters/leibniz/atlas.json"); 
-        this.load.atlas("ada_lovelace", "characters/ada/atlas.png", "characters/ada/atlas.json"); 
-        this.load.atlas("turing", "characters/turing/atlas.png", "characters/turing/atlas.json"); 
-        this.load.atlas("searle", "characters/searle/atlas.png", "characters/searle/atlas.json"); 
-        this.load.atlas("chomsky", "characters/chomsky/atlas.png", "characters/chomsky/atlas.json"); 
-        this.load.atlas("dennett", "characters/dennett/atlas.png", "characters/dennett/atlas.json"); 
-        this.load.atlas("miguel", "characters/miguel/atlas.png", "characters/miguel/atlas.json");
-        this.load.atlas("paul", "characters/paul/atlas.png", "characters/paul/atlas.json");
-        this.load.atlas("zombie", "characters/zombie/atlas.png", "characters/zombie/atlas.json"); 
     }
 
     create ()
