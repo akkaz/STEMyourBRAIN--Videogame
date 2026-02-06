@@ -81,24 +81,29 @@ class WebSocketApiService {
 
   handleMessage(event) {
     const data = JSON.parse(event.data);
-    
+
     if (data.error) {
       console.error('WebSocket error:', data.error);
       return;
     }
-    
+
     if (data.streaming !== undefined) {
       this.handleStreamingUpdate(data.streaming);
       return;
     }
-    
+
     if (data.chunk) {
       this.triggerCallback('chunk', data.chunk);
       return;
     }
-    
+
     if (data.response) {
       this.triggerCallback('message', data.response);
+
+      // Handle game events (e.g., victory)
+      if (data.game_event) {
+        this.triggerCallback('gameEvent', data.game_event);
+      }
     }
   }
 
@@ -138,7 +143,7 @@ class WebSocketApiService {
     if (callbacks.onMessage) {
       this.messageCallbacks.set('message', callbacks.onMessage);
     }
-    
+
     if (callbacks.onStreamingStart) {
       this.messageCallbacks.set('streaming', (isStreaming) => {
         if (isStreaming) {
@@ -148,9 +153,13 @@ class WebSocketApiService {
         }
       });
     }
-    
+
     if (callbacks.onChunk) {
       this.messageCallbacks.set('chunk', callbacks.onChunk);
+    }
+
+    if (callbacks.onGameEvent) {
+      this.messageCallbacks.set('gameEvent', callbacks.onGameEvent);
     }
   }
 

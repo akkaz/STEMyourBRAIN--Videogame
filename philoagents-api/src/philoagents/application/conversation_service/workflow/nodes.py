@@ -8,15 +8,17 @@ from philoagents.application.conversation_service.workflow.chains import (
     get_philosopher_response_chain,
 )
 from philoagents.application.conversation_service.workflow.state import PhilosopherState
-from philoagents.application.conversation_service.workflow.tools import tools
+from philoagents.application.conversation_service.workflow.tools import tools, victory_tools
 from philoagents.config import settings
 
 retriever_node = ToolNode(tools)
+victory_node = ToolNode(victory_tools)
 
 
 async def conversation_node(state: PhilosopherState, config: RunnableConfig):
     summary = state.get("summary", "")
-    conversation_chain = get_philosopher_response_chain()
+    philosopher_id = state.get("philosopher_id", "")
+    conversation_chain = get_philosopher_response_chain(philosopher_id=philosopher_id)
 
     response = await conversation_chain.ainvoke(
         {
@@ -29,8 +31,16 @@ async def conversation_node(state: PhilosopherState, config: RunnableConfig):
         },
         config,
     )
-    
-    return {"messages": response}
+
+    # Check if victory tool was called
+    result = {"messages": response}
+    if hasattr(response, "tool_calls") and response.tool_calls:
+        for tool_call in response.tool_calls:
+            if tool_call.get("name") == "trigger_victory":
+                result["game_event"] = "victory"
+                break
+
+    return result
 
 
 async def summarize_conversation_node(state: PhilosopherState):

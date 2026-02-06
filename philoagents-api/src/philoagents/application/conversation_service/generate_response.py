@@ -62,6 +62,7 @@ async def get_response(
             output_state = await graph.ainvoke(
                 input={
                     "messages": __format_messages(messages=messages),
+                    "philosopher_id": philosopher_id,
                     "philosopher_name": philosopher_name,
                     "philosopher_perspective": philosopher_perspective,
                     "philosopher_style": philosopher_style,
@@ -75,6 +76,13 @@ async def get_response(
         raise RuntimeError(f"Error running conversation workflow: {str(e)}") from e
 
 
+class StreamingResponseWithState:
+    """Wrapper for streaming response that also captures the final game_event."""
+
+    def __init__(self):
+        self.game_event: str | None = None
+
+
 async def get_streaming_response(
     messages: str | list[str] | list[dict[str, Any]],
     philosopher_id: str,
@@ -83,6 +91,7 @@ async def get_streaming_response(
     philosopher_style: str,
     philosopher_context: str,
     new_thread: bool = False,
+    state_holder: StreamingResponseWithState | None = None,
 ) -> AsyncGenerator[str, None]:
     """Run a conversation through the workflow graph with streaming response.
 
@@ -94,6 +103,7 @@ async def get_streaming_response(
         philosopher_style: Style of conversation (e.g., "Socratic").
         philosopher_context: Additional context about the philosopher.
         new_thread: Whether to create a new conversation thread.
+        state_holder: Optional object to store the final game_event after streaming.
 
     Yields:
         Chunks of the response as they become available.
@@ -124,6 +134,7 @@ async def get_streaming_response(
             async for chunk in graph.astream(
                 input={
                     "messages": __format_messages(messages=messages),
+                    "philosopher_id": philosopher_id,
                     "philosopher_name": philosopher_name,
                     "philosopher_perspective": philosopher_perspective,
                     "philosopher_style": philosopher_style,
@@ -136,6 +147,12 @@ async def get_streaming_response(
                     chunk[0], AIMessageChunk
                 ):
                     yield chunk[0].content
+
+            # After streaming completes, get the final state for game_event
+            if state_holder is not None:
+                final_state = await graph.aget_state(config)
+                if final_state and final_state.values:
+                    state_holder.game_event = final_state.values.get("game_event")
 
     except Exception as e:
         raise RuntimeError(

@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from philoagents.application.conversation_service.generate_response import (
     get_response,
     get_streaming_response,
+    StreamingResponseWithState,
 )
 from philoagents.application.conversation_service.reset_conversation import (
     reset_conversation_state,
@@ -220,6 +221,9 @@ async def websocket_chat(websocket: WebSocket):
                     data["philosopher_id"]
                 )
 
+                # Create state holder to capture game_event after streaming
+                state_holder = StreamingResponseWithState()
+
                 # Use streaming response instead of get_response
                 response_stream = get_streaming_response(
                     messages=data["message"],
@@ -228,6 +232,7 @@ async def websocket_chat(websocket: WebSocket):
                     philosopher_perspective=philosopher.perspective,
                     philosopher_style=philosopher.style,
                     philosopher_context="",
+                    state_holder=state_holder,
                 )
 
                 # Send initial message to indicate streaming has started
@@ -239,9 +244,12 @@ async def websocket_chat(websocket: WebSocket):
                     full_response += chunk
                     await websocket.send_json({"chunk": chunk})
 
-                await websocket.send_json(
-                    {"response": full_response, "streaming": False}
-                )
+                # Include game_event in final response if present
+                final_response = {"response": full_response, "streaming": False}
+                if state_holder.game_event:
+                    final_response["game_event"] = state_holder.game_event
+
+                await websocket.send_json(final_response)
 
             except Exception as e:
                 opik_tracer = OpikTracer()

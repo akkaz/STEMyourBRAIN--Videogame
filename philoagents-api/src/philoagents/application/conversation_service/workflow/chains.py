@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from philoagents.application.conversation_service.workflow.tools import tools
+from philoagents.application.conversation_service.workflow.tools import tools, victory_tools
 from philoagents.application.llm_service.model_factory import (
     get_chat_model,
     get_context_summary_model,
@@ -14,10 +14,21 @@ from philoagents.domain.prompts import (
 )
 
 
-def get_philosopher_response_chain():
-    """Create the main philosopher response chain with tool calling."""
+def get_philosopher_response_chain(philosopher_id: str = ""):
+    """Create the main philosopher response chain with tool calling.
+
+    Args:
+        philosopher_id: The ID of the philosopher. If "nicolo", victory tools are included.
+    """
     model = get_chat_model()
-    model = model.bind_tools(tools)
+
+    # Nicolò gets access to the victory tool
+    if philosopher_id == "nicolo":
+        all_tools = tools + victory_tools
+    else:
+        all_tools = tools
+
+    model = model.bind_tools(all_tools)
     system_message = PHILOSOPHER_CHARACTER_CARD
 
     prompt = ChatPromptTemplate.from_messages(

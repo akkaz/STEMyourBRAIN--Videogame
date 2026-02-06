@@ -111,9 +111,9 @@ class DialogueManager {
 
   async processWebSocketMessage() {
     await WebSocketApiService.connect();
-    
+
     const callbacks = {
-      onMessage: () => { 
+      onMessage: () => {
         this.finishStreaming();
       },
       onChunk: (chunk) => {
@@ -125,19 +125,25 @@ class DialogueManager {
       },
       onStreamingEnd: () => {
         this.finishStreaming();
+      },
+      onGameEvent: (event) => {
+        // Notify the scene about game events (e.g., victory)
+        if (this.scene && typeof this.scene.handleGameEvent === 'function') {
+          this.scene.handleGameEvent(event);
+        }
       }
     };
-    
+
     await WebSocketApiService.sendMessage(
       this.activePhilosopher,
       this.currentMessage,
       callbacks
     );
-    
+
     while (this.isStreaming) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
-    
+
     this.currentMessage = '';
     WebSocketApiService.disconnect();
   }

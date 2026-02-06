@@ -18,6 +18,8 @@ export class Game extends Scene
         this.philosophers = [];
         this.labelsVisible = true;
         this.tutorialActive = true;
+        this.victoryActive = false;
+        this.gameWon = false;
     }
 
     create ()
@@ -310,7 +312,7 @@ export class Game extends Scene
     update(time, delta) {
         const isInDialogue = this.dialogueBox.isVisible();
 
-        if (!isInDialogue && !this.tutorialActive) {
+        if (!isInDialogue && !this.tutorialActive && !this.victoryActive) {
             this.updatePlayerMovement();
         }
         
@@ -539,5 +541,223 @@ scoprire il nome del colpevole.`;
         this.tutorialPanel.destroy();
         this.tutorialTexts.forEach(t => t.destroy());
         this.tutorialActive = false;
+    }
+
+    // === GAME EVENTS ===
+
+    handleGameEvent(event) {
+        if (event === 'victory' && !this.gameWon) {
+            this.gameWon = true;
+            // Show victory screen after a short delay to let dialogue finish
+            this.time.delayedCall(2000, () => {
+                this.showVictory();
+            });
+        }
+    }
+
+    showVictory() {
+        this.victoryActive = true;
+        this.victoryPage = 1;
+        this.createVictoryBase();
+        this.showVictoryPage1();
+    }
+
+    createVictoryBase() {
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // Dark overlay
+        this.victoryOverlay = this.add.graphics();
+        this.victoryOverlay.fillStyle(0x000000, 0.9);
+        this.victoryOverlay.fillRect(0, 0, width, height);
+        this.victoryOverlay.setScrollFactor(0).setDepth(200);
+
+        // Victory panel with gold border
+        this.victoryPanel = this.add.graphics();
+        this.victoryPanel.fillStyle(0x1a1a2e, 1);
+        this.victoryPanel.fillRoundedRect(centerX - 280, centerY - 220, 560, 440, 20);
+        this.victoryPanel.lineStyle(4, 0xffd700, 1);
+        this.victoryPanel.strokeRoundedRect(centerX - 280, centerY - 220, 560, 440, 20);
+        this.victoryPanel.setScrollFactor(0).setDepth(201);
+
+        // Click handler
+        this.victoryOverlay.setInteractive(
+            new Phaser.Geom.Rectangle(0, 0, width, height),
+            Phaser.Geom.Rectangle.Contains
+        );
+        this.victoryOverlay.on('pointerdown', () => this.nextVictoryPage());
+
+        this.victoryTexts = [];
+    }
+
+    showVictoryPage1() {
+        const width = this.cameras.main.width;
+        const centerX = width / 2;
+        const centerY = this.cameras.main.height / 2;
+
+        // Victory title with crown emoji
+        this.victoryTexts.push(this.add.text(centerX, centerY - 180, '👑 VITTORIA! 👑', {
+            fontSize: '36px', fontFamily: 'Arial', color: '#ffd700', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
+
+        // Subtitle
+        this.victoryTexts.push(this.add.text(centerX, centerY - 135, 'Il Mistero è Stato Risolto!', {
+            fontSize: '20px', fontFamily: 'Arial', color: '#ffffff', fontStyle: 'italic'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
+
+        // Victory story
+        const story = `Complimenti, investigatrice Sophia!
+
+Hai scoperto la verità su Bobby, il rapitore
+che si nascondeva proprio sotto i tuoi occhi,
+travestito da guida spirituale.
+
+Grazie al tuo ingegno e alla tua perseveranza,
+il Capo-città Giacomo può finalmente tornare
+a guidare Babilonia.
+
+La città ti è eternamente grata!`;
+
+        this.victoryTexts.push(this.add.text(centerX, centerY - 90, story, {
+            fontSize: '16px', fontFamily: 'Arial', color: '#d1d5db', align: 'center', lineSpacing: 6
+        }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(202));
+
+        // Continue prompt
+        this.victoryTexts.push(this.add.text(centerX, centerY + 165, '[ Clicca per continuare ]', {
+            fontSize: '18px', fontFamily: 'Arial', color: '#ffd700', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
+
+        this.victoryTexts.push(this.add.text(centerX, centerY + 195, '1 / 2', {
+            fontSize: '14px', fontFamily: 'Arial', color: '#888888'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
+    }
+
+    showVictoryPage2() {
+        const width = this.cameras.main.width;
+        const centerX = width / 2;
+        const centerY = this.cameras.main.height / 2;
+
+        // Credits title
+        this.victoryTexts.push(this.add.text(centerX, centerY - 180, '🎮 GRAZIE PER AVER GIOCATO 🎮', {
+            fontSize: '24px', fontFamily: 'Arial', color: '#ffd700', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
+
+        // Credits
+        const credits = `BABILONIA: Il Segreto di Bobby
+
+Un gioco narrativo con personaggi AI
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+Sviluppato con passione
+usando Phaser 3 e LangChain
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+Vuoi rigiocare?
+Premi il pulsante qui sotto per ricominciare
+una nuova avventura a Babilonia!`;
+
+        this.victoryTexts.push(this.add.text(centerX, centerY - 130, credits, {
+            fontSize: '15px', fontFamily: 'Arial', color: '#d1d5db', align: 'center', lineSpacing: 5
+        }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(202));
+
+        // New Game button
+        const buttonY = centerY + 140;
+        const buttonWidth = 200;
+        const buttonHeight = 45;
+
+        this.newGameButton = this.add.graphics();
+        this.newGameButton.fillStyle(0xffd700, 1);
+        this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 10);
+        this.newGameButton.setScrollFactor(0).setDepth(202);
+
+        this.newGameButtonText = this.add.text(centerX, buttonY, '🔄 NUOVA PARTITA', {
+            fontSize: '16px', fontFamily: 'Arial', color: '#1a1a2e', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(203);
+
+        // Make button interactive
+        this.newGameButton.setInteractive(
+            new Phaser.Geom.Rectangle(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight),
+            Phaser.Geom.Rectangle.Contains
+        );
+        this.newGameButton.on('pointerdown', () => this.restartGame());
+        this.newGameButton.on('pointerover', () => {
+            this.newGameButton.clear();
+            this.newGameButton.fillStyle(0xffc000, 1);
+            this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 10);
+        });
+        this.newGameButton.on('pointerout', () => {
+            this.newGameButton.clear();
+            this.newGameButton.fillStyle(0xffd700, 1);
+            this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 10);
+        });
+
+        this.victoryTexts.push(this.add.text(centerX, centerY + 195, '2 / 2', {
+            fontSize: '14px', fontFamily: 'Arial', color: '#888888'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
+    }
+
+    clearVictoryTexts() {
+        this.victoryTexts.forEach(t => t.destroy());
+        this.victoryTexts = [];
+    }
+
+    nextVictoryPage() {
+        if (this.victoryPage === 1) {
+            this.clearVictoryTexts();
+            this.victoryPage = 2;
+            this.showVictoryPage2();
+        }
+        // Page 2 has buttons, so clicking outside does nothing
+    }
+
+    closeVictory() {
+        if (this.victoryOverlay) this.victoryOverlay.destroy();
+        if (this.victoryPanel) this.victoryPanel.destroy();
+        if (this.newGameButton) this.newGameButton.destroy();
+        if (this.newGameButtonText) this.newGameButtonText.destroy();
+        this.victoryTexts.forEach(t => t.destroy());
+        this.victoryActive = false;
+    }
+
+    async restartGame() {
+        // Close victory screen
+        this.closeVictory();
+
+        // Reset game state
+        this.gameWon = false;
+
+        // Call API to reset memory
+        try {
+            const response = await fetch(`${this.getApiUrl()}/reset-memory`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (!response.ok) {
+                console.error('Failed to reset memory:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error resetting memory:', error);
+        }
+
+        // Restart the scene
+        this.scene.restart();
+    }
+
+    getApiUrl() {
+        // Check for build-time API_URL (Railway deployment)
+        if (process.env.API_URL) {
+            return process.env.API_URL;
+        }
+        // Fallback to auto-detection for local dev
+        const isHttps = window.location.protocol === 'https:';
+        if (isHttps) {
+            const currentHostname = window.location.hostname;
+            return `https://${currentHostname.replace('8080', '8000')}`;
+        }
+        return 'http://localhost:8000';
     }
 }
