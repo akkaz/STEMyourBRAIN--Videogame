@@ -1,25 +1,40 @@
-# PhiloAgents API
+# Babilonia API
 
-Check the [INSTALL_AND_USAGE.md](../INSTALL_AND_USAGE.md) file for instructions on how to install and use the API.
+Backend Python per il gioco Babilonia: Il Segreto di Bobby.
 
-# 🔧 Utlity Commands
+Vedi [CLAUDE.md](../CLAUDE.md) per la documentazione tecnica completa.
 
-## Formatting
-
-```
-make format-check
-make format-fix
-```
-
-## Linting
+## Quick Start
 
 ```bash
-make lint-check
-make lint-fix
+# Con Docker (consigliato)
+cd ..
+make infrastructure-up
+
+# Senza Docker
+uv venv .venv && source .venv/bin/activate
+uv pip install -e .
+cp .env.example .env  # Configura le API keys
+uv run fastapi run src/philoagents/infrastructure/api.py --port 8000
 ```
 
-## Tests
+## Comandi Utili
 
 ```bash
-make test
+make format-check    # Controlla formattazione
+make format-fix      # Correggi formattazione
+make lint-check      # Controlla linting
+make lint-fix        # Correggi linting
+make test            # Esegui test
 ```
+
+## API Endpoints
+
+| Endpoint | Metodo | Descrizione |
+|----------|--------|-------------|
+| `/ws/chat` | WebSocket | Chat streaming (primario) |
+| `/chat` | POST | Chat non-streaming (fallback) |
+| `/models/current` | GET | Provider LLM corrente |
+| `/models/test` | POST | Testa un provider |
+| `/reset-memory` | POST | Reset memoria conversazioni |
+| `/debug/prompt-config` | GET | Verifica versione prompt |

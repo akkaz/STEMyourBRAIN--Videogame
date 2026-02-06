@@ -18,7 +18,6 @@ async def get_response(
     philosopher_name: str,
     philosopher_perspective: str,
     philosopher_style: str,
-    philosopher_context: str,
     new_thread: bool = False,
 ) -> tuple[str, PhilosopherState]:
     """Run a conversation through the workflow graph.
@@ -66,7 +65,6 @@ async def get_response(
                     "philosopher_name": philosopher_name,
                     "philosopher_perspective": philosopher_perspective,
                     "philosopher_style": philosopher_style,
-                    "philosopher_context": philosopher_context,
                 },
                 config=config,
             )
@@ -89,7 +87,6 @@ async def get_streaming_response(
     philosopher_name: str,
     philosopher_perspective: str,
     philosopher_style: str,
-    philosopher_context: str,
     new_thread: bool = False,
     state_holder: StreamingResponseWithState | None = None,
 ) -> AsyncGenerator[str, None]:
@@ -138,7 +135,6 @@ async def get_streaming_response(
                     "philosopher_name": philosopher_name,
                     "philosopher_perspective": philosopher_perspective,
                     "philosopher_style": philosopher_style,
-                    "philosopher_context": philosopher_context,
                 },
                 config=config,
                 stream_mode="messages",

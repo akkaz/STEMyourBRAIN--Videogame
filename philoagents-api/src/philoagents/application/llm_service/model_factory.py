@@ -103,17 +103,3 @@ def get_summary_model(temperature: float = 0.7) -> BaseChatModel:
     )
 
 
-def get_context_summary_model(temperature: float = 0.7) -> BaseChatModel:
-    """
-    Get a chat model for RAG context summarization.
-
-    Args:
-        temperature: Sampling temperature (0.0 to 1.0)
-
-    Returns:
-        BaseChatModel: LangChain chat model instance for context summarization
-    """
-    return get_chat_model(
-        temperature=temperature,
-        model_name=settings.LLM_MODEL_CONTEXT_SUMMARY,
-    )

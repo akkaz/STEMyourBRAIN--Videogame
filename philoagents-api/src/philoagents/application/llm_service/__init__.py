@@ -2,12 +2,10 @@
 
 from .model_factory import (
     get_chat_model,
-    get_context_summary_model,
     get_summary_model,
 )
 
 __all__ = [
     "get_chat_model",
     "get_summary_model",
-    "get_context_summary_model",
 ]

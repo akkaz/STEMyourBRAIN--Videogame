@@ -89,21 +89,18 @@ class WebSocketApiService {
 
     if (data.streaming !== undefined) {
       this.handleStreamingUpdate(data.streaming);
-      return;
     }
 
     if (data.chunk) {
       this.triggerCallback('chunk', data.chunk);
-      return;
     }
 
     if (data.response) {
       this.triggerCallback('message', data.response);
+    }
 
-      // Handle game events (e.g., victory)
-      if (data.game_event) {
-        this.triggerCallback('gameEvent', data.game_event);
-      }
+    if (data.game_event) {
+      this.triggerCallback('gameEvent', data.game_event);
     }
   }
 
