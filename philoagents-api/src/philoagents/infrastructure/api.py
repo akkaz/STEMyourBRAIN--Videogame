@@ -41,6 +41,12 @@ app.add_middleware(
 )
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for frontend connectivity monitoring."""
+    return {"status": "ok"}
+
+
 @app.get("/debug/prompt-config")
 async def debug_prompt_config():
     """Debug endpoint to check prompt configuration"""

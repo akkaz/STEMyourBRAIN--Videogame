@@ -37,12 +37,16 @@ class DialogueManager {
   setupKeyboardListeners() {
     this.scene.input.keyboard.on('keydown', async (event) => {
       if (!this.isTyping) {
-        if (this.isStreaming && (event.key === 'Space' || event.key === ' ')) {
-          this.skipStreaming();
+        if (event.key === 'Space' || event.key === ' ') {
+          if (this.isStreaming) {
+            this.skipStreaming();
+          } else if (this.dialogueBox && this.dialogueBox.hasNextPage()) {
+            this.dialogueBox.nextPage();
+          }
         }
         return;
       }
-    
+
       this.handleKeyPress(event);
     });
   }
@@ -118,7 +122,7 @@ class DialogueManager {
       },
       onChunk: (chunk) => {
         this.streamingText += chunk;
-        this.dialogueBox.show(this.streamingText, true);
+        this.dialogueBox.show(this.streamingText, true, true);
       },
       onStreamingStart: () => {
         this.isStreaming = true;
@@ -233,9 +237,11 @@ class DialogueManager {
 
   continueDialogue() {
     if (!this.dialogueBox.isVisible()) return;
-    
+
     if (this.isStreaming) {
       this.skipStreaming();
+    } else if (this.dialogueBox.hasNextPage()) {
+      this.dialogueBox.nextPage();
     } else if (!this.isTyping) {
       this.isTyping = true;
       this.currentMessage = '';

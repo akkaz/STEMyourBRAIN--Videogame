@@ -12,7 +12,7 @@ export class Preloader extends Scene
         this.load.setPath('assets');
 
         // General assets
-        this.load.image('background', 'babilonia_cover.jpg');
+        this.load.image('background', 'babilonia_cover.png');
         this.load.image('logo', 'logo.png');
 
         // Tilesets

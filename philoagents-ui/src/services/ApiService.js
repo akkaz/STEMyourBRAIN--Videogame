@@ -74,6 +74,17 @@ class ApiService {
       throw error;
     }
   }
+  async checkHealth() {
+    try {
+      const response = await fetch(`${this.apiUrl}/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(3000)
+      });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
 }
 
-export default new ApiService(); 
+export default new ApiService();

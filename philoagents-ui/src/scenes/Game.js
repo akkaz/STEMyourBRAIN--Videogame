@@ -2,6 +2,7 @@ import { Scene } from 'phaser';
 import Character from '../classes/Character';
 import DialogueBox from '../classes/DialogueBox';
 import DialogueManager from '../classes/DialogueManager';
+import ApiService from '../services/ApiService';
 
 export class Game extends Scene
 {
@@ -20,6 +21,9 @@ export class Game extends Scene
         this.tutorialActive = true;
         this.victoryActive = false;
         this.gameWon = false;
+        this.apiConnected = false;
+        this.statusDot = null;
+        this.healthPollEvent = null;
     }
 
     create ()
@@ -61,6 +65,10 @@ export class Game extends Scene
 
         // Show tutorial overlay
         this.showTutorial();
+
+        // API connection status indicator
+        this.createStatusIndicator();
+        this.startHealthPolling();
     }
 
     createPhilosophers(map, layers) {
@@ -543,6 +551,50 @@ scoprire il nome del colpevole.`;
         this.tutorialActive = false;
     }
 
+    // === API STATUS INDICATOR ===
+
+    createStatusIndicator() {
+        this.statusDot = this.add.graphics();
+        this.statusDot.setScrollFactor(0);
+        this.statusDot.setDepth(50);
+        this.drawStatusDot(false);
+    }
+
+    drawStatusDot(connected) {
+        const x = this.cameras.main.width - 30;
+        const y = 20;
+
+        this.statusDot.clear();
+        this.statusDot.fillStyle(connected ? 0x166534 : 0x7f1d1d, 0.5);
+        this.statusDot.fillCircle(x, y, 10);
+        this.statusDot.fillStyle(connected ? 0x22c55e : 0xef4444, 1);
+        this.statusDot.fillCircle(x, y, 8);
+    }
+
+    async pollHealth() {
+        const wasConnected = this.apiConnected;
+        this.apiConnected = await ApiService.checkHealth();
+        this.drawStatusDot(this.apiConnected);
+
+        if (wasConnected !== this.apiConnected && this.healthPollEvent) {
+            this.healthPollEvent.remove();
+            this.healthPollEvent = this.time.addEvent({
+                delay: this.apiConnected ? 30000 : 5000,
+                callback: () => this.pollHealth(),
+                loop: true
+            });
+        }
+    }
+
+    async startHealthPolling() {
+        await this.pollHealth();
+        this.healthPollEvent = this.time.addEvent({
+            delay: this.apiConnected ? 30000 : 5000,
+            callback: () => this.pollHealth(),
+            loop: true
+        });
+    }
+
     // === GAME EVENTS ===
 
     handleGameEvent(event) {
@@ -574,12 +626,12 @@ scoprire il nome del colpevole.`;
         this.victoryOverlay.fillRect(0, 0, width, height);
         this.victoryOverlay.setScrollFactor(0).setDepth(200);
 
-        // Victory panel with gold border
+        // Victory panel - taller to fit content (560x540)
         this.victoryPanel = this.add.graphics();
         this.victoryPanel.fillStyle(0x1a1a2e, 1);
-        this.victoryPanel.fillRoundedRect(centerX - 280, centerY - 220, 560, 440, 20);
+        this.victoryPanel.fillRoundedRect(centerX - 280, centerY - 270, 560, 540, 20);
         this.victoryPanel.lineStyle(4, 0xffd700, 1);
-        this.victoryPanel.strokeRoundedRect(centerX - 280, centerY - 220, 560, 440, 20);
+        this.victoryPanel.strokeRoundedRect(centerX - 280, centerY - 270, 560, 540, 20);
         this.victoryPanel.setScrollFactor(0).setDepth(201);
 
         // Click handler
@@ -593,17 +645,17 @@ scoprire il nome del colpevole.`;
     }
 
     showVictoryPage1() {
-        const width = this.cameras.main.width;
-        const centerX = width / 2;
+        const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2;
+        const top = centerY - 250;
 
-        // Victory title with crown emoji
-        this.victoryTexts.push(this.add.text(centerX, centerY - 180, '👑 VITTORIA! 👑', {
+        // Victory title
+        this.victoryTexts.push(this.add.text(centerX, top, '👑 VITTORIA! 👑', {
             fontSize: '36px', fontFamily: 'Arial', color: '#ffd700', fontStyle: 'bold'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
 
         // Subtitle
-        this.victoryTexts.push(this.add.text(centerX, centerY - 135, 'Il Mistero è Stato Risolto!', {
+        this.victoryTexts.push(this.add.text(centerX, top + 50, 'Il Mistero è Stato Risolto!', {
             fontSize: '20px', fontFamily: 'Arial', color: '#ffffff', fontStyle: 'italic'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
 
@@ -620,33 +672,32 @@ a guidare Babilonia.
 
 La città ti è eternamente grata!`;
 
-        this.victoryTexts.push(this.add.text(centerX, centerY - 90, story, {
+        this.victoryTexts.push(this.add.text(centerX, top + 90, story, {
             fontSize: '16px', fontFamily: 'Arial', color: '#d1d5db', align: 'center', lineSpacing: 6
         }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(202));
 
-        // Continue prompt
-        this.victoryTexts.push(this.add.text(centerX, centerY + 165, '[ Clicca per continuare ]', {
+        // Continue prompt - anchored to panel bottom
+        this.victoryTexts.push(this.add.text(centerX, centerY + 220, '[ Clicca per continuare ]', {
             fontSize: '18px', fontFamily: 'Arial', color: '#ffd700', fontStyle: 'bold'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
 
-        this.victoryTexts.push(this.add.text(centerX, centerY + 195, '1 / 2', {
+        this.victoryTexts.push(this.add.text(centerX, centerY + 248, '1 / 2', {
             fontSize: '14px', fontFamily: 'Arial', color: '#888888'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
     }
 
     showVictoryPage2() {
-        const width = this.cameras.main.width;
-        const centerX = width / 2;
+        const centerX = this.cameras.main.width / 2;
         const centerY = this.cameras.main.height / 2;
+        const top = centerY - 250;
 
         // Credits title
-        this.victoryTexts.push(this.add.text(centerX, centerY - 180, '🎮 GRAZIE PER AVER GIOCATO 🎮', {
+        this.victoryTexts.push(this.add.text(centerX, top, '🎮 GRAZIE PER AVER GIOCATO 🎮', {
             fontSize: '24px', fontFamily: 'Arial', color: '#ffd700', fontStyle: 'bold'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
 
-        // Credits
+        // Credits - more compact
         const credits = `BABILONIA: Il Segreto di Bobby
-
 Un gioco narrativo con personaggi AI
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -654,28 +705,24 @@ Un gioco narrativo con personaggi AI
 Sviluppato con passione
 usando Phaser 3 e LangChain
 
-━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━`;
 
-Vuoi rigiocare?
-Premi il pulsante qui sotto per ricominciare
-una nuova avventura a Babilonia!`;
-
-        this.victoryTexts.push(this.add.text(centerX, centerY - 130, credits, {
+        this.victoryTexts.push(this.add.text(centerX, top + 50, credits, {
             fontSize: '15px', fontFamily: 'Arial', color: '#d1d5db', align: 'center', lineSpacing: 5
         }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(202));
 
-        // New Game button
-        const buttonY = centerY + 140;
-        const buttonWidth = 200;
-        const buttonHeight = 45;
+        // New Game button - anchored to panel bottom
+        const buttonY = centerY + 170;
+        const buttonWidth = 250;
+        const buttonHeight = 50;
 
         this.newGameButton = this.add.graphics();
         this.newGameButton.fillStyle(0xffd700, 1);
-        this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 10);
+        this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 12);
         this.newGameButton.setScrollFactor(0).setDepth(202);
 
         this.newGameButtonText = this.add.text(centerX, buttonY, '🔄 NUOVA PARTITA', {
-            fontSize: '16px', fontFamily: 'Arial', color: '#1a1a2e', fontStyle: 'bold'
+            fontSize: '18px', fontFamily: 'Arial', color: '#1a1a2e', fontStyle: 'bold'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(203);
 
         // Make button interactive
@@ -687,15 +734,15 @@ una nuova avventura a Babilonia!`;
         this.newGameButton.on('pointerover', () => {
             this.newGameButton.clear();
             this.newGameButton.fillStyle(0xffc000, 1);
-            this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 10);
+            this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 12);
         });
         this.newGameButton.on('pointerout', () => {
             this.newGameButton.clear();
             this.newGameButton.fillStyle(0xffd700, 1);
-            this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 10);
+            this.newGameButton.fillRoundedRect(centerX - buttonWidth/2, buttonY - buttonHeight/2, buttonWidth, buttonHeight, 12);
         });
 
-        this.victoryTexts.push(this.add.text(centerX, centerY + 195, '2 / 2', {
+        this.victoryTexts.push(this.add.text(centerX, centerY + 248, '2 / 2', {
             fontSize: '14px', fontFamily: 'Arial', color: '#888888'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(202));
     }
