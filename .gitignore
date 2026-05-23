@@ -314,3 +314,11 @@ pyrightconfig.json
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,python,visualstudiocode,pycharm+all
+
+# Cloudflare deployment
+.deploy/
+.wrangler/
+philoagents-api/.wrangler/
+philoagents-api/node_modules/
+philoagents-ui/.wrangler/
+node_modules/
