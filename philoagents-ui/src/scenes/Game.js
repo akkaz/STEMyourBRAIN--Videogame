@@ -21,6 +21,8 @@ export class Game extends Scene
         this.tutorialActive = true;
         this.victoryActive = false;
         this.gameWon = false;
+        this.nicoloMenuActive = false;
+        this.solutionFormActive = false;
         this.apiConnected = false;
         this.statusDot = null;
         this.healthPollEvent = null;
@@ -190,8 +192,14 @@ export class Game extends Scene
         
         if (nearbyPhilosopher) {
             if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-                if (!this.dialogueBox.isVisible()) {
-                    this.dialogueManager.startDialogue(nearbyPhilosopher);
+                if (this.nicoloMenuActive || this.solutionFormActive) {
+                    // already in Nicolò menu/form, ignore space
+                } else if (!this.dialogueBox.isVisible()) {
+                    if (nearbyPhilosopher.id === 'nicolo') {
+                        this.showNicoloMenu(nearbyPhilosopher);
+                    } else {
+                        this.dialogueManager.startDialogue(nearbyPhilosopher);
+                    }
                 } else if (!this.dialogueManager.isTyping) {
                     this.dialogueManager.continueDialogue();
                 }
@@ -320,10 +328,10 @@ export class Game extends Scene
     update(time, delta) {
         const isInDialogue = this.dialogueBox.isVisible();
 
-        if (!isInDialogue && !this.tutorialActive && !this.victoryActive) {
+        if (!isInDialogue && !this.tutorialActive && !this.victoryActive && !this.nicoloMenuActive && !this.solutionFormActive) {
             this.updatePlayerMovement();
         }
-        
+
         this.checkPhilosopherInteraction();
         
         this.philosophers.forEach(philosopher => {
@@ -806,5 +814,268 @@ usando Phaser 3 e LangChain
             return `https://${currentHostname.replace('8080', '8000')}`;
         }
         return 'http://localhost:8000';
+    }
+
+    // === NICOLÒ MENU (Tutorial / Soluzione) ===
+
+    showNicoloMenu(nicoloChar) {
+        if (this.nicoloMenuActive) return;
+        this.nicoloMenuActive = true;
+        this._nicoloChar = nicoloChar;
+
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        const nm = {};
+        nm.overlay = this.add.graphics().setScrollFactor(0).setDepth(150);
+        nm.overlay.fillStyle(0x000000, 0.75);
+        nm.overlay.fillRect(0, 0, width, height);
+
+        nm.panel = this.add.graphics().setScrollFactor(0).setDepth(151);
+        nm.panel.fillStyle(0x1a1a2e, 1);
+        nm.panel.fillRoundedRect(cx - 240, cy - 160, 480, 320, 20);
+        nm.panel.lineStyle(3, 0x60a5fa, 1);
+        nm.panel.strokeRoundedRect(cx - 240, cy - 160, 480, 320, 20);
+
+        nm.title = this.add.text(cx, cy - 120, 'Nicolò', {
+            fontSize: '28px', fontFamily: 'Arial', color: '#60a5fa', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(152);
+
+        nm.subtitle = this.add.text(cx, cy - 85, 'Cosa vuoi fare?', {
+            fontSize: '18px', fontFamily: 'Arial', color: '#d1d5db', fontStyle: 'italic'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(152);
+
+        nm.buttons = [];
+        nm.buttons.push(this.createMenuButton(cx, cy - 20, 'Tutorial', () => {
+            this.closeNicoloMenu();
+            this.playNicoloTutorial();
+        }));
+        nm.buttons.push(this.createMenuButton(cx, cy + 50, 'Fornisci soluzione', () => {
+            this.closeNicoloMenu();
+            this.showSolutionForm();
+        }));
+        nm.buttons.push(this.createMenuButton(cx, cy + 120, 'Annulla', () => {
+            this.closeNicoloMenu();
+        }, 0x6b7280));
+
+        this._nicoloMenu = nm;
+
+        nm.escHandler = (e) => {
+            if (e.key === 'Escape') this.closeNicoloMenu();
+        };
+        this.input.keyboard.on('keydown', nm.escHandler);
+    }
+
+    createMenuButton(x, y, text, callback, baseColor = 0x60a5fa) {
+        const w = 320, h = 50, r = 12;
+        const btn = this.add.graphics().setScrollFactor(0).setDepth(152);
+        const draw = (color) => {
+            btn.clear();
+            btn.fillStyle(color, 1);
+            btn.fillRoundedRect(x - w / 2, y - h / 2, w, h, r);
+            btn.lineStyle(2, 0xffffff, 0.4);
+            btn.strokeRoundedRect(x - w / 2, y - h / 2, w, h, r);
+        };
+        draw(baseColor);
+        btn.setInteractive(
+            new Phaser.Geom.Rectangle(x - w / 2, y - h / 2, w, h),
+            Phaser.Geom.Rectangle.Contains
+        );
+        const label = this.add.text(x, y, text, {
+            fontSize: '20px', fontFamily: 'Arial', color: '#ffffff', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(153);
+        btn.on('pointerover', () => draw(Phaser.Display.Color.IntegerToColor(baseColor).brighten(20).color));
+        btn.on('pointerout', () => draw(baseColor));
+        btn.on('pointerdown', callback);
+        return { btn, label };
+    }
+
+    closeNicoloMenu() {
+        if (!this._nicoloMenu) return;
+        const nm = this._nicoloMenu;
+        nm.overlay.destroy();
+        nm.panel.destroy();
+        nm.title.destroy();
+        nm.subtitle.destroy();
+        nm.buttons.forEach(b => { b.btn.destroy(); b.label.destroy(); });
+        if (nm.escHandler) this.input.keyboard.off('keydown', nm.escHandler);
+        this._nicoloMenu = null;
+        this.nicoloMenuActive = false;
+    }
+
+    async playNicoloTutorial() {
+        const tutorial = "Benvenuta a Babilonia, Sophia. Il nostro Capo-città Giacomo è stato rapito! Esplora la città, parla con i suoi abitanti e risolvi i loro enigmi: ognuno ti darà una lettera. Mettile insieme e tornerai da me per rivelare il nome del colpevole. Buona fortuna!";
+        await this.dialogueManager.showAgentMessage(this._nicoloChar, tutorial);
+    }
+
+    // === SOLUTION FORM ===
+
+    showSolutionForm() {
+        if (this.solutionFormActive) return;
+        this.solutionFormActive = true;
+
+        const SOLUTION = 'BOBBY';
+        const width = this.cameras.main.width;
+        const height = this.cameras.main.height;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        const sf = {
+            solution: SOLUTION,
+            letters: ['', '', '', '', ''],
+            correct: [false, false, false, false, false],
+            cursor: 0,
+            submitted: false
+        };
+
+        sf.overlay = this.add.graphics().setScrollFactor(0).setDepth(160);
+        sf.overlay.fillStyle(0x000000, 0.85);
+        sf.overlay.fillRect(0, 0, width, height);
+
+        sf.panel = this.add.graphics().setScrollFactor(0).setDepth(161);
+        sf.panel.fillStyle(0x1a1a2e, 1);
+        sf.panel.fillRoundedRect(cx - 320, cy - 200, 640, 400, 20);
+        sf.panel.lineStyle(3, 0xeab308, 1);
+        sf.panel.strokeRoundedRect(cx - 320, cy - 200, 640, 400, 20);
+
+        sf.title = this.add.text(cx, cy - 160, 'Chi è il rapitore?', {
+            fontSize: '26px', fontFamily: 'Arial', color: '#eab308', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(162);
+
+        sf.hint = this.add.text(cx, cy - 125, 'Inserisci le 5 lettere del suo nome', {
+            fontSize: '16px', fontFamily: 'Arial', color: '#d1d5db', fontStyle: 'italic'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(162);
+
+        // 5 caselle
+        const boxSize = 70, gap = 14;
+        const totalW = boxSize * 5 + gap * 4;
+        const startX = cx - totalW / 2;
+        const boxY = cy - 50;
+        sf.boxes = [];
+        sf.boxTexts = [];
+        for (let i = 0; i < 5; i++) {
+            const bx = startX + i * (boxSize + gap);
+            const g = this.add.graphics().setScrollFactor(0).setDepth(162);
+            sf.boxes.push(g);
+            const t = this.add.text(bx + boxSize / 2, boxY + boxSize / 2, '', {
+                fontSize: '40px', fontFamily: 'Arial', color: '#ffffff', fontStyle: 'bold'
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(163);
+            sf.boxTexts.push(t);
+            g._x = bx; g._y = boxY; g._size = boxSize;
+        }
+
+        sf.feedback = this.add.text(cx, cy + 50, '', {
+            fontSize: '18px', fontFamily: 'Arial', color: '#f87171', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(162);
+
+        sf.submitBtn = this.createMenuButton(cx - 110, cy + 120, 'Conferma', () => this.submitSolution(), 0x10b981);
+        sf.closeBtn = this.createMenuButton(cx + 110, cy + 120, 'Chiudi', () => this.closeSolutionForm(), 0x6b7280);
+
+        this._solutionForm = sf;
+        this.redrawSolutionBoxes();
+
+        sf.keyHandler = (e) => {
+            if (e.key === 'Escape') {
+                this.closeSolutionForm();
+                return;
+            }
+            if (e.key === 'Enter') {
+                this.submitSolution();
+                return;
+            }
+            if (e.key === 'Backspace') {
+                if (sf.cursor > 0) {
+                    sf.cursor--;
+                    sf.letters[sf.cursor] = '';
+                    sf.correct[sf.cursor] = false;
+                    sf.submitted = false;
+                    sf.feedback.setText('');
+                    this.redrawSolutionBoxes();
+                }
+                return;
+            }
+            if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+                // skip already-correct slots (after a submit)
+                while (sf.cursor < 5 && sf.correct[sf.cursor]) sf.cursor++;
+                if (sf.cursor < 5) {
+                    sf.letters[sf.cursor] = e.key.toUpperCase();
+                    sf.cursor++;
+                    while (sf.cursor < 5 && sf.correct[sf.cursor]) sf.cursor++;
+                    sf.submitted = false;
+                    sf.feedback.setText('');
+                    this.redrawSolutionBoxes();
+                }
+            }
+        };
+        this.input.keyboard.on('keydown', sf.keyHandler);
+    }
+
+    redrawSolutionBoxes() {
+        const sf = this._solutionForm;
+        if (!sf) return;
+        for (let i = 0; i < 5; i++) {
+            const g = sf.boxes[i];
+            const isCursor = (i === sf.cursor) && !sf.submitted;
+            const fillColor = sf.correct[i] ? 0x10b981 : 0x111827;
+            const borderColor = sf.correct[i] ? 0x10b981 : (isCursor ? 0xeab308 : 0x4b5563);
+            g.clear();
+            g.fillStyle(fillColor, 1);
+            g.fillRoundedRect(g._x, g._y, g._size, g._size, 10);
+            g.lineStyle(3, borderColor, 1);
+            g.strokeRoundedRect(g._x, g._y, g._size, g._size, 10);
+            sf.boxTexts[i].setText(sf.letters[i]);
+        }
+    }
+
+    submitSolution() {
+        const sf = this._solutionForm;
+        if (!sf) return;
+        if (sf.letters.some(l => !l)) {
+            sf.feedback.setColor('#f87171');
+            sf.feedback.setText('Inserisci tutte e 5 le lettere');
+            return;
+        }
+        sf.submitted = true;
+        const sol = sf.solution;
+        let allRight = true;
+        for (let i = 0; i < 5; i++) {
+            sf.correct[i] = (sf.letters[i] === sol[i]);
+            if (!sf.correct[i]) allRight = false;
+        }
+        this.redrawSolutionBoxes();
+
+        if (allRight) {
+            sf.feedback.setColor('#10b981');
+            sf.feedback.setText('Esatto! Hai svelato il mistero...');
+            this.time.delayedCall(1500, () => {
+                this.closeSolutionForm();
+                this.handleGameEvent('victory');
+            });
+        } else {
+            sf.feedback.setColor('#f87171');
+            sf.feedback.setText('Non è il nome giusto. Le lettere verdi sono al posto corretto.');
+            sf.cursor = sf.correct.findIndex(c => !c);
+            if (sf.cursor === -1) sf.cursor = 0;
+            this.redrawSolutionBoxes();
+        }
+    }
+
+    closeSolutionForm() {
+        const sf = this._solutionForm;
+        if (!sf) return;
+        sf.overlay.destroy();
+        sf.panel.destroy();
+        sf.title.destroy();
+        sf.hint.destroy();
+        sf.feedback.destroy();
+        sf.boxes.forEach(b => b.destroy());
+        sf.boxTexts.forEach(t => t.destroy());
+        sf.submitBtn.btn.destroy(); sf.submitBtn.label.destroy();
+        sf.closeBtn.btn.destroy(); sf.closeBtn.label.destroy();
+        if (sf.keyHandler) this.input.keyboard.off('keydown', sf.keyHandler);
+        this._solutionForm = null;
+        this.solutionFormActive = false;
     }
 }

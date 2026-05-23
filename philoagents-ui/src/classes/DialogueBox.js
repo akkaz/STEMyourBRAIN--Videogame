@@ -97,7 +97,7 @@ class DialogueBox {
         }
     }
 
-    showTypingIndicator(speakerName, speakerColor) {
+    showTypingIndicator(speakerName, speakerColor, phrases) {
         this.stopTypingIndicator();
         this.setSpeaker(speakerName, speakerColor);
         this.container.setVisible(true);
@@ -105,23 +105,38 @@ class DialogueBox {
         this.pages = [];
         this.currentPage = 0;
         this.pageIndicator.setText('');
-        this.typingDotsCount = 1;
-        this.text.setText('.');
+
+        const pool = (phrases && phrases.length) ? phrases : ['Sta pensando...'];
+        const originalFill = this.text.style.color || this.text.style.fill;
+        this.text.setColor('#9ca3af');
+        this.text.setFontStyle('italic');
+
+        const pickPhrase = () => {
+            const phrase = pool[Math.floor(Math.random() * pool.length)];
+            this.text.setText(phrase);
+        };
+        pickPhrase();
 
         this.typingTimer = this.scene.time.addEvent({
-            delay: 350,
+            delay: 2200,
             loop: true,
-            callback: () => {
-                this.typingDotsCount = (this.typingDotsCount % 3) + 1;
-                this.text.setText('.'.repeat(this.typingDotsCount));
-            }
+            callback: pickPhrase
         });
+
+        this._restoreTextStyle = () => {
+            this.text.setColor(originalFill);
+            this.text.setFontStyle('normal');
+            this._restoreTextStyle = null;
+        };
     }
 
     stopTypingIndicator() {
         if (this.typingTimer) {
             this.typingTimer.remove();
             this.typingTimer = null;
+        }
+        if (this._restoreTextStyle) {
+            this._restoreTextStyle();
         }
     }
 

@@ -11,6 +11,52 @@ const SPEAKER_COLORS = {
   socrates: '#fcd34d'
 };
 
+const WAITING_PHRASES = {
+  nicolo: [
+    'Sorride enigmatico...',
+    'Scruta Sophia con sguardo gentile...',
+    'Sceglie con cura le parole...'
+  ],
+  akane: [
+    'Sbuffa contrariata...',
+    'Incrocia le braccia, infastidita...',
+    'Borbotta qualcosa fra sé...',
+    'Distoglie lo sguardo arrossendo...'
+  ],
+  hiroshi: [
+    'Si liscia il mantello con sufficienza...',
+    'Solleva il mento, compiaciuto...',
+    'Soppesa la tua domanda con aria altezzosa...'
+  ],
+  ryo: [
+    'Chiude gli occhi in meditazione...',
+    'Resta in silenzio...',
+    'Annuisce lentamente...'
+  ],
+  mei: [
+    'Sfoglia un libro polveroso...',
+    'Cerca tra antichi tomi...',
+    'Sorride dolcemente prima di rispondere...'
+  ],
+  kaito: [
+    'Tira una boccata dalla pipa...',
+    'Scruta l\'orizzonte con occhi stanchi...',
+    'Si aggiusta il berretto da marinaio...',
+    'Sospira al ricordo del mare...'
+  ],
+  socrates: [
+    'Strizza l\'occhio rompendo la quarta parete...',
+    'Aggiusta gli occhiali con un sorriso...',
+    'Si gratta il mento, pensieroso...'
+  ]
+};
+
+const DEFAULT_WAITING_PHRASES = [
+  'Sta riflettendo...',
+  'Cerca le parole giuste...',
+  'Consulta i suoi pensieri...'
+];
+
 class DialogueManager {
   constructor(scene) {
     // Core properties
@@ -91,7 +137,8 @@ class DialogueManager {
       this.stopCursorBlink();
       this.dialogueBox.showTypingIndicator(
         this.activePhilosopher.name,
-        this.getSpeakerColor()
+        this.getSpeakerColor(),
+        WAITING_PHRASES[this.activePhilosopher?.id] || DEFAULT_WAITING_PHRASES
       );
       
       if (this.activePhilosopher.defaultMessage) {
@@ -249,9 +296,21 @@ class DialogueManager {
     this.isTyping = false;
     this.currentMessage = '';
     this.isStreaming = false;
-    
+
     this.stopCursorBlink();
     this.scheduleDisconnect();
+  }
+
+  async showAgentMessage(philosopher, text) {
+    this.cancelDisconnectTimeout();
+    this.activePhilosopher = philosopher;
+    this.isTyping = false;
+    this.currentMessage = '';
+    this.stopCursorBlink();
+
+    this.dialogueBox.setSpeaker(philosopher.name, SPEAKER_COLORS[philosopher.id] || '#ffffff');
+    this.dialogueBox.show('', false);
+    await this.streamText(text);
   }
 
   isInDialogue() {
