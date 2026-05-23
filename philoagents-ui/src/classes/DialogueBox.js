@@ -7,7 +7,11 @@ class DialogueBox {
         this.fullMessage = '';
         this.pages = [];
         this.currentPage = 0;
-        this.maxLines = 6;
+        this.maxLines = 5;
+
+        // Typing indicator state
+        this.typingTimer = null;
+        this.typingDotsCount = 0;
 
         // Set default configuration values
         const {
@@ -39,8 +43,14 @@ class DialogueBox {
         graphics.lineStyle(borderWidth, borderColor);
         graphics.strokeRect(x, y, width, height);
 
-        // Create text with padding
-        this.text = scene.add.text(x + 20, y + 20, '', textConfig);
+        // Speaker name label (top of box, colored per character)
+        this.speakerLabel = scene.add.text(x + 20, y + 12, '', {
+            font: 'bold 18px Arial',
+            fill: '#ffffff'
+        });
+
+        // Main text (shifted down to leave room for speaker label)
+        this.text = scene.add.text(x + 20, y + 42, '', textConfig);
 
         // Page indicator (e.g. "▼ SPAZIO per continuare")
         this.pageIndicator = scene.add.text(x + width - 20, y + height - 15, '', {
@@ -50,13 +60,25 @@ class DialogueBox {
         }).setOrigin(1, 1);
 
         // Group elements
-        this.container = scene.add.container(0, 0, [graphics, this.text, this.pageIndicator]);
+        this.container = scene.add.container(0, 0, [graphics, this.speakerLabel, this.text, this.pageIndicator]);
         this.container.setDepth(depth);
         this.container.setScrollFactor(0);
         this.hide();
     }
 
+    setSpeaker(name, color) {
+        if (name) {
+            this.speakerLabel.setText(name);
+            this.speakerLabel.setColor(color || '#ffffff');
+            this.speakerLabel.setVisible(true);
+        } else {
+            this.speakerLabel.setText('');
+            this.speakerLabel.setVisible(false);
+        }
+    }
+
     show(message, awaitInput = false, streaming = false) {
+        this.stopTypingIndicator();
         this.fullMessage = message;
         this.awaitingInput = awaitInput;
         this.container.setVisible(true);
@@ -72,6 +94,34 @@ class DialogueBox {
             this.pages = this.paginateText(message);
             this.currentPage = 0;
             this.showCurrentPage();
+        }
+    }
+
+    showTypingIndicator(speakerName, speakerColor) {
+        this.stopTypingIndicator();
+        this.setSpeaker(speakerName, speakerColor);
+        this.container.setVisible(true);
+        this.awaitingInput = true;
+        this.pages = [];
+        this.currentPage = 0;
+        this.pageIndicator.setText('');
+        this.typingDotsCount = 1;
+        this.text.setText('.');
+
+        this.typingTimer = this.scene.time.addEvent({
+            delay: 350,
+            loop: true,
+            callback: () => {
+                this.typingDotsCount = (this.typingDotsCount % 3) + 1;
+                this.text.setText('.'.repeat(this.typingDotsCount));
+            }
+        });
+    }
+
+    stopTypingIndicator() {
+        if (this.typingTimer) {
+            this.typingTimer.remove();
+            this.typingTimer = null;
         }
     }
 
@@ -129,6 +179,8 @@ class DialogueBox {
     }
 
     hide() {
+        this.stopTypingIndicator();
+        this.setSpeaker(null);
         this.container.setVisible(false);
         this.awaitingInput = false;
         this.pages = [];

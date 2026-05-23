@@ -1,13 +1,23 @@
 import ApiService from '../services/ApiService';
 import WebSocketApiService from '../services/WebSocketApiService';
 
+const SPEAKER_COLORS = {
+  nicolo: '#60a5fa',
+  akane: '#f87171',
+  hiroshi: '#34d399',
+  ryo: '#a78bfa',
+  mei: '#f9a8d4',
+  kaito: '#fbbf24',
+  socrates: '#fcd34d'
+};
+
 class DialogueManager {
   constructor(scene) {
     // Core properties
     this.scene = scene;
     this.dialogueBox = null;
     this.activePhilosopher = null;
-    
+
     // State management
     this.isTyping = false;
     this.isStreaming = false;
@@ -72,10 +82,17 @@ class DialogueManager {
     }
   }
 
+  getSpeakerColor() {
+    return SPEAKER_COLORS[this.activePhilosopher?.id] || '#ffffff';
+  }
+
   async handleEnterKey() {
     if (this.currentMessage.trim() !== '') {
-      this.dialogueBox.show('...', true);
       this.stopCursorBlink();
+      this.dialogueBox.showTypingIndicator(
+        this.activePhilosopher.name,
+        this.getSpeakerColor()
+      );
       
       if (this.activePhilosopher.defaultMessage) {
         await this.handleDefaultMessage();
@@ -94,12 +111,12 @@ class DialogueManager {
   
   async handleDefaultMessage() {
     const apiResponse = this.activePhilosopher.defaultMessage;
+    this.dialogueBox.setSpeaker(this.activePhilosopher.name, this.getSpeakerColor());
     this.dialogueBox.show('', true);
     await this.streamText(apiResponse);
   }
 
   async handleWebSocketMessage() {
-    this.dialogueBox.show('', true);
     this.isStreaming = true;
     this.streamingText = '';
     
@@ -121,6 +138,9 @@ class DialogueManager {
         this.finishStreaming();
       },
       onChunk: (chunk) => {
+        if (this.streamingText === '') {
+          this.dialogueBox.setSpeaker(this.activePhilosopher.name, this.getSpeakerColor());
+        }
         this.streamingText += chunk;
         this.dialogueBox.show(this.streamingText, true, true);
       },
@@ -159,9 +179,10 @@ class DialogueManager {
 
   async fallbackToRegularApi() {
     const apiResponse = await ApiService.sendMessage(
-      this.activePhilosopher, 
+      this.activePhilosopher,
       this.currentMessage
     );
+    this.dialogueBox.setSpeaker(this.activePhilosopher.name, this.getSpeakerColor());
     await this.streamText(apiResponse);
   }
 
@@ -174,6 +195,7 @@ class DialogueManager {
 
   restartTypingPrompt() {
     this.currentMessage = '';
+    this.dialogueBox.setSpeaker(null);
     this.dialogueBox.show('|', true);
     
     this.stopCursorBlink();
@@ -213,7 +235,8 @@ class DialogueManager {
     this.activePhilosopher = philosopher;
     this.isTyping = true;
     this.currentMessage = '';
-    
+
+    this.dialogueBox.setSpeaker(null);
     this.dialogueBox.show('|', true);
     this.stopCursorBlink();
     
